@@ -19,33 +19,46 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Service
 public class GenerationService {
 
+    @Autowired
     private DebugLogger logger;
 
     public boolean generate_and_append(InputStream attachment, String newOwner) {
-        String filePath = "VehicleDatabase.xlsx";
-        String outputPath = "VehicleDatabaseClone.xlsx";
-        String fieldToChange = "Email";
-        String newValue = newOwner; // The new email
-        try (FileInputStream fis = new FileInputStream(filePath);
-             Workbook workbook = new XSSFWorkbook(fis);
-             FileOutputStream fos = new FileOutputStream(outputPath)) {
-            Sheet sheet = workbook.getSheetAt(0); // Assuming you want to process the first sheet
-            for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
-                if (row != null) {
-                    Cell originalCell = row.getCell(getCellIndex(row, fieldToChange));
-                    if (originalCell != null) {
-                        Cell newCell = row.createCell(originalCell.getColumnIndex() + 1, originalCell.getCellType());
-                        newCell.setCellValue(newValue);
+            String filePath = "VehicleDatabase.xlsx";
+            String fieldToChange = "Email";
+            String newValue = newOwner;
+            try (FileInputStream fis = new FileInputStream(filePath);
+                 Workbook workbook = new XSSFWorkbook(fis)) {
+                Sheet originalSheet = workbook.getSheetAt(0); // Assuming you want to process the first sheet
+                for (int rowIndex = 0; rowIndex <= originalSheet.getLastRowNum(); rowIndex++) {
+                    Row originalRow = originalSheet.getRow(rowIndex);
+                    if (originalRow != null) {
+                        Cell originalCell = originalRow.getCell(getCellIndex(originalRow, fieldToChange));
+                        if (originalCell != null) {
+                            // Create a new sheet for the modified data
+                            Sheet newSheet = workbook.createSheet("ModifiedData");
+                            // Create a new row in the new sheet
+                            Row newRow = newSheet.createRow(newSheet.getLastRowNum() + 1);
+                            // Duplicate the original row in the new sheet
+                            for (int cellIndex = 0; cellIndex <= originalRow.getLastCellNum(); cellIndex++) {
+                                Cell newCell = newRow.createCell(cellIndex, originalRow.getCell(cellIndex).getCellType());
+                                if (cellIndex == originalCell.getColumnIndex()) {
+                                    newCell.setCellValue(newValue);
+                                } else {
+                                    newCell.setCellValue(originalRow.getCell(cellIndex).getStringCellValue());
+                                }
+                            }
+                        }
                     }
                 }
+                // Write the updated workbook back to the same file
+                try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                    workbook.write(fos);
+                    logger.info("Excel file duplicated and modified successfully. Modified data appended.");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            workbook.write(fos);
-            System.out.println("Excel file duplicated and modified successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+            return false;
     }
 
     private static int getCellIndex(Row row, String cellValue) {
