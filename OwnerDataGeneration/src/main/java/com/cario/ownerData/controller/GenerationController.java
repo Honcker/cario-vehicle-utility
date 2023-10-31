@@ -15,12 +15,10 @@ public class GenerationController {
 
     @GetMapping("/xlsx")
     public ResponseEntity<byte[]> downloadXlsxDocument() throws IOException {
-        // Load the XLSX document from the classpath
         ClassPathResource resource = new ClassPathResource("sample.xlsx");
-        // Create the response entity
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", "sample.xlsx");
+        headers.setContentDispositionFormData("attachment", "VehicleDatabse.xlsx");
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(resource.getInputStream().readAllBytes());
