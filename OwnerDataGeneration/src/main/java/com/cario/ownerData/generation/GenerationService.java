@@ -27,38 +27,24 @@ public class GenerationService {
             String filePath = "VehicleDatabase.xlsx";
             String fieldToChange = "Email";
             String newValue = newOwner;
-            try (FileInputStream fis = new FileInputStream(filePath);
-                 Workbook workbook = new XSSFWorkbook(fis)) {
-                Sheet originalSheet = workbook.getSheetAt(0); // Assuming you want to process the first sheet
-                for (int rowIndex = 0; rowIndex <= originalSheet.getLastRowNum(); rowIndex++) {
-                    Row originalRow = originalSheet.getRow(rowIndex);
-                    if (originalRow != null) {
-                        Cell originalCell = originalRow.getCell(getCellIndex(originalRow, fieldToChange));
-                        if (originalCell != null) {
-                            // Create a new sheet for the modified data
-                            Sheet newSheet = workbook.createSheet("ModifiedData");
-                            // Create a new row in the new sheet
-                            Row newRow = newSheet.createRow(newSheet.getLastRowNum() + 1);
-                            // Duplicate the original row in the new sheet
-                            for (int cellIndex = 0; cellIndex <= originalRow.getLastCellNum(); cellIndex++) {
-                                Cell newCell = newRow.createCell(cellIndex, originalRow.getCell(cellIndex).getCellType());
-                                if (cellIndex == originalCell.getColumnIndex()) {
-                                    newCell.setCellValue(newValue);
-                                } else {
-                                    newCell.setCellValue(originalRow.getCell(cellIndex).getStringCellValue());
-                                }
-                            }
-                        }
-                    }
-                }
-                // Write the updated workbook back to the same file
-                try (FileOutputStream fos = new FileOutputStream(filePath)) {
-                    workbook.write(fos);
-                    logger.info("Excel file duplicated and modified successfully. Modified data appended.");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        int numberOfVehicles = 10; // Change this to the number of vehicles you want to generate
+        String outputFileName = "vehicle_data.xlsx";
+        try (Workbook workbook = new XSSFWorkbook();
+             FileOutputStream outputStream = new FileOutputStream(outputFileName)) {
+            Sheet sheet = workbook.createSheet("Vehicle Data");
+            for (int i = 0; i < numberOfVehicles; i++) {
+                Row row = sheet.createRow(i);
+                String randomVin = generateRandomVin();
+                // Create a cell for each piece of vehicle data
+                Cell cell = row.createCell(0);
+                cell.setCellValue(randomVin);
             }
+            workbook.write(outputStream);
+            System.out.println("Vehicle data written to " + outputFileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
             return false;
     }
 
