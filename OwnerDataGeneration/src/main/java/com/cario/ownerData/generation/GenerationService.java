@@ -23,10 +23,7 @@ public class GenerationService {
     @Autowired
     private DebugLogger logger;
 
-    public boolean generate_and_append(InputStream attachment, String newOwner) {
-            String filePath = "VehicleDatabase.xlsx";
-            String fieldToChange = "Email";
-            String newValue = newOwner;
+    public boolean generate_and_append( String newOwner) {
         int numberOfVehicles = 10; // Change this to the number of vehicles you want to generate
         String outputFileName = "vehicle_data.xlsx";
         try (Workbook workbook = new XSSFWorkbook();
