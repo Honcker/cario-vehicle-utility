@@ -20,6 +20,102 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Service
 public class GenerationService {
 
+    private static String[] carBodyTypes = {
+            "Sedan",
+            "SUV",
+            "Hatchback",
+            "Convertible",
+            "Coupe",
+            "Minivan",
+            "Truck",
+            "Crossover",
+            "Wagon",
+            "Van"
+    };
+
+    private static String[] carMakes = {
+            "Jeep",
+            "Nissan",
+            "Saturn",
+            "Ford",
+            "Lexus",
+            "Dodge",
+            "Tesla",
+            "Audi",
+            "Hyundai",
+            "Volkswagen"
+    };
+
+    private static String[] carModels = {
+            "Cherokee",
+            "Xterra",
+            "Vue",
+            "Edge",
+            "IS",
+            "Journey",
+            "Model S",
+            "R8",
+            "Accent",
+            "Passat"
+    };
+
+
+    private static String[] carColors = {
+            "Red",
+            "Blue",
+            "Green",
+            "Silver",
+            "White",
+            "Black",
+            "Gray",
+            "Yellow",
+            "Orange",
+            "Purple"
+    };
+
+    private static String[] generateCompleteData(String name) {
+        // Call previous generators for specific fields
+        String vin = generateRandomVin();
+        String[] carData = generateData();
+        String randomCarMake = generateRandomCarMake();
+        String randomCarModel = generateRandomCarModel();
+        String randomCarBodyType = generateRandomCarBodyType();
+        String randomCarColor = selectRandomCarColor();
+        String [] ownerData = generateOwnerData(name);
+        String[] lienData = generateLien(generateRandomNumber(0,1));
+        // Combine all data into a single string array
+        String[] completeData = {
+                vin,
+                randomCarMake,
+                randomCarModel,
+                String.valueOf(generateRandomYear()),
+                randomCarBodyType,
+                randomCarColor,
+                carData[0],  // GMW
+                carData[1],  // Title No.
+                carData[2],  // Issuing Date
+                carData[3],  // State
+                carData[4],  // Previous Mileage
+                ownerData[0],  // name
+                ownerData[1],  // phone
+                ownerData[2],  // email
+                ownerData[3],  // address 1
+                ownerData[4],  // address 2
+                ownerData[5], //city
+                ownerData[6], //state
+                ownerData[7], //zip
+                lienData[0],  //Lien Status
+                lienData[1],  // Lien Name
+                lienData[2],  // Lien Address Line 1
+                lienData[3],  // Lien Address Line 2
+                lienData[4],  // Lien City
+                lienData[5],  // Lien State
+                lienData[6]   // Lien Zip
+        };
+        return completeData;
+    }
+
+
     @Autowired
     private DebugLogger logger;
 
@@ -43,6 +139,13 @@ public class GenerationService {
         }
 
             return false;
+    }
+
+    private static int generateRandomYear() {
+        int minYear = 2010;
+        int maxYear = 2022;
+        Random random = new Random();
+        return random.nextInt(maxYear - minYear + 1) + minYear;
     }
 
     private static String generateRandomVin() {
@@ -84,10 +187,6 @@ public class GenerationService {
         int checkDigitValue = sum % 11;
         return (checkDigitValue == 10) ? 'X' : (char) ('0' + checkDigitValue);
     }
-    public static void main(String[] args) {
-        String randomVin = generateRandomVin();
-        System.out.println("Random VIN: " + randomVin);
-    }
 
     private static int getCellIndex(Row row, String cellValue) {
         for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
@@ -99,20 +198,111 @@ public class GenerationService {
         return -1; // Not found
     }
 
-        public String[] decodeVin(String vin) {
-            if (vin.length() != 17) {
-                System.out.println("Invalid VIN length. A VIN must be 17 characters.");
-                return null;
-            }
-
-            String country = vin.substring(0, 3);
-            String manufacturer = vin.substring(3, 8);
-            String yearCode = vin.charAt(9) == 'X' ? "2019 or later" : "20" + vin.charAt(9);
-            int assemblyPlant = vin.charAt(10) - 'A' + 1;
-            String serialNumber = vin.substring(11);
-
-            return new String[yearCode, serialNumber];
+    private static String[] generateLien(int l) {
+        String lienStatus = "No";
+        if (l == 1) {
+            // Lien exists
+            lienStatus = "Yes";
+            String lienName = "Chase Auto Finance NY";
+            String addressLine1 = "100 Broadway Street";
+            String addressLine2 = "Suite 456";
+            String city = "New York CIty";
+            String state = "NY";
+            String zip = "10005";
+            return new String[] { lienStatus, lienName, addressLine1, addressLine2, city, state, zip };
+        } else if (l == 0) {
+            //no lien exists
+            String lienName = "-";
+            String addressLine1 = "-";
+            String addressLine2 = "-";
+            String city = "-";
+            String state = "-";
+            String zip = "-";
+            return new String[] { lienStatus, lienName, addressLine1, addressLine2, city, state, zip };
+        } else {
+            return null;
         }
+    }
+
+    private static String[] generateData() {
+        String GMW = Integer.toString(generateRandomNumber(3500, 6500));
+        String issuingDate = generateRandomDate();
+        String state = generateRandomState();
+        String titleNo = state + generateRandomNumber(100000, 999999);
+        String previousMileage = String.valueOf(generateRandomNumber(1000, 3500));
+        return new String[] { GMW, titleNo, issuingDate, state, previousMileage };
+    }
+    private static int generateRandomNumber(int min, int max) {
+        Random random = new Random();
+        return random.nextInt(max - min + 1) + min;
+    }
+    private static String generateRandomDate() {
+        int day = generateRandomNumber(1, 28);
+        int month = generateRandomNumber(1, 12);
+        int year = generateRandomNumber(2000, 2023);
+        return String.format("%02d/%02d/%04d", month, day, year);
+    }
+    private static String generateRandomState() {
+        String[] states = { "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY" };
+        Random random = new Random();
+        int randomIndex = random.nextInt(states.length);
+        return states[randomIndex];
+    }
+
+    private static String generateRandomCarBodyType() {
+        Random random = new Random();
+        int randomIndex = random.nextInt(carBodyTypes.length);
+        return carBodyTypes[randomIndex];
+    }
+
+    private static String selectRandomCarColor() {
+        Random random = new Random();
+        int randomIndex = random.nextInt(carColors.length);
+        return carColors[randomIndex];
+    }
+
+    private static String[] generateOwnerData(String name) {
+        // Fixed values
+        String number = "9004578825";
+        String addressLine1 = "123 Main Street";
+        String addressLine2 = "Apt 4B";
+        String city = "New York City";
+        String state = "NY";
+        String zip = "10008";
+        return new String[] { name, number, name, addressLine1, addressLine2, city, state, zip };
+    }
+
+
+
+
+
+
+//    public String[] decodeVin(String vin) {
+//            if (vin.length() != 17) {
+//                System.out.println("Invalid VIN length. A VIN must be 17 characters.");
+//                return null;
+//            }
+//
+//            String country = vin.substring(0, 3);
+//            String manufacturer = vin.substring(3, 8);
+//            String yearCode = vin.charAt(9) == 'X' ? "2019 or later" : "20" + vin.charAt(9);
+//            int assemblyPlant = vin.charAt(10) - 'A' + 1;
+//            String serialNumber = vin.substring(11);
+//
+//            return new String[] {yearCode, serialNumber};
+//    }
+
+    private static String generateRandomCarMake() {
+        Random random = new Random();
+        int randomIndex = random.nextInt(carMakes.length);
+        return carMakes[randomIndex];
+    }
+
+    private static String generateRandomCarModel() {
+        Random random = new Random();
+        int randomIndex = random.nextInt(carModels.length);
+        return carModels[randomIndex];
+    }
 
 
 
