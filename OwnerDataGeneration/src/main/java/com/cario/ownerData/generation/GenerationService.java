@@ -119,18 +119,19 @@ public class GenerationService {
     @Autowired
     private DebugLogger logger;
 
-    public boolean generate_and_append( String newOwner) {
-        int numberOfVehicles = 10; // Change this to the number of vehicles you want to generate
+    public boolean generate_and_append( String newOwner, int numberOfVehicles) {
         String outputFileName = "vehicle_data.xlsx";
         try (Workbook workbook = new XSSFWorkbook();
              FileOutputStream outputStream = new FileOutputStream(outputFileName)) {
             Sheet sheet = workbook.createSheet("Vehicle Data");
             for (int i = 0; i < numberOfVehicles; i++) {
                 Row row = sheet.createRow(i);
-                String randomVin = generateRandomVin();
-                // Create a cell for each piece of vehicle data
-                Cell cell = row.createCell(0);
-                cell.setCellValue(randomVin);
+                String[] completeData = generateCompleteData(newOwner);
+                for (int j = 0; j < completeData.length; j++) {
+                    // Create a cell for each piece of vehicle data
+                    Cell cell = row.createCell(j);
+                    cell.setCellValue(completeData[j]);
+                }
             }
             workbook.write(outputStream);
             System.out.println("Vehicle data written to " + outputFileName);
