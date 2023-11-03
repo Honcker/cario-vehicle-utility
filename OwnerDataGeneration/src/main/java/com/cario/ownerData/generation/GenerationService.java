@@ -116,7 +116,7 @@ public class GenerationService {
     }
 
 
-    @Autowired
+//    @Autowired
     private DebugLogger logger;
 
     public boolean generate_and_append( String newOwner, int numberOfVehicles) {
@@ -137,9 +137,9 @@ public class GenerationService {
             System.out.println("Vehicle data written to " + outputFileName);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
             return false;
+        }
+        return true;
     }
 
     private static int generateRandomYear() {
