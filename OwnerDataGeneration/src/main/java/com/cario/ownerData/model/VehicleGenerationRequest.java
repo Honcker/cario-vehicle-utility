@@ -6,13 +6,13 @@ public class VehicleGenerationRequest {
     public String getOwner() {
         return owner;
     }
-    public void setOwner(String owner) {
+    private void setOwner(String owner) {
         this.owner = owner;
     }
     public int getVehicles() {
         return vehicles;
     }
-    public void setVehicles(int vehicles) {
+    private void setVehicles(int vehicles) {
         this.vehicles = vehicles;
     }
 }
