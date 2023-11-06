@@ -1,16 +1,11 @@
 package com.cario.ownerData.controller;
-//import com.cario.ownerData.generation.GenerationService;
 import com.cario.ownerData.generation.GenerationService;
+//import com.cario.ownerData.generation.GenerationHelper;
+import com.cario.ownerData.model.VehicleGenerationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/ownerGen")
@@ -31,9 +26,9 @@ public class GenerationController {
 //    }
 
 
-    @PostMapping("/generate/{email}/{vehicles}")
-    public ResponseEntity<String> uploadExcel(@PathVariable("email") String email, @PathVariable("vehicles") int vehicles ) {
-        if(service.generate_and_append(email, vehicles)) {
+    @PostMapping("/generate")
+    public ResponseEntity<String> uploadExcel(@RequestBody VehicleGenerationRequest request) {
+        if(service.generate_and_append(request.getOwner(), request.getVehicles())) {
             return new ResponseEntity<>("Generation Success", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Failed to Generate", HttpStatus.BAD_REQUEST);
