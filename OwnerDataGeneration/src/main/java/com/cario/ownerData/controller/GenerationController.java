@@ -13,12 +13,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
+@RequestMapping("/ownerGen")
 public class GenerationController {
 
     @Autowired
     private GenerationService service;
 
-    @GetMapping("/xlsx")
+//    @GetMapping("/xlsx")
 //    public ResponseEntity<byte[]> downloadXlsxDocument() throws IOException {
 //        ClassPathResource resource = new ClassPathResource("sample.xlsx");
 //        HttpHeaders headers = new HttpHeaders();
@@ -30,8 +31,8 @@ public class GenerationController {
 //    }
 
 
-    @PostMapping("/generate")
-    public ResponseEntity<String> uploadExcel(@RequestParam("Owner") String email, @RequestParam("Vehicles") int vehicles ) {
+    @PostMapping("/generate/{email}/{vehicles}")
+    public ResponseEntity<String> uploadExcel(@PathVariable("email") String email, @PathVariable("vehicles") int vehicles ) {
         if(service.generate_and_append(email, vehicles)) {
             return new ResponseEntity<>("Generation Success", HttpStatus.OK);
         } else {

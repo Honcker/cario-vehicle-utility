@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -19,6 +20,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Service
 public class GenerationService {
+
+    private int year;
+
+    private static boolean lien;
 
     private static String[] carBodyTypes = {
             "Sedan",
@@ -88,12 +93,14 @@ public class GenerationService {
                 vin,
                 randomCarMake,
                 randomCarModel,
-                String.valueOf(generateRandomYear()),
+                Integer.toString(generateRandomYear()),
                 randomCarBodyType,
                 randomCarColor,
                 carData[0],  // GMW
                 carData[1],  // Title No.
-                carData[2],  // Issuing Date
+                generateLicensePlate(),
+                String.valueOf(generateRandomDateAsDouble()/34619045.4858
+                ),  // Issuing Date
                 carData[3],  // State
                 carData[4],  // Previous Mileage
                 ownerData[0],  // name
@@ -104,6 +111,7 @@ public class GenerationService {
                 ownerData[5], //city
                 ownerData[6], //state
                 ownerData[7], //zip
+                "-",
                 lienData[0],  //Lien Status
                 lienData[1],  // Lien Name
                 lienData[2],  // Lien Address Line 1
@@ -120,17 +128,33 @@ public class GenerationService {
     private DebugLogger logger;
 
     public boolean generate_and_append( String newOwner, int numberOfVehicles) {
-        String outputFileName = "vehicle_data.xlsx";
+        String outputFileName = newOwner + "_vehicle_data.xlsx";
         try (Workbook workbook = new XSSFWorkbook();
              FileOutputStream outputStream = new FileOutputStream(outputFileName)) {
-            Sheet sheet = workbook.createSheet("Vehicle Data");
+            Sheet sheet = workbook.createSheet("Sheet1");
             for (int i = 0; i < numberOfVehicles; i++) {
                 Row row = sheet.createRow(i);
                 String[] completeData = generateCompleteData(newOwner);
-                for (int j = 0; j < completeData.length; j++) {
-                    // Create a cell for each piece of vehicle data
-                    Cell cell = row.createCell(j);
-                    cell.setCellValue(completeData[j]);
+                for (int j = 0; j <= completeData.length; j++) {
+                    if (j == 0) {
+                        Cell cell = row.createCell(0);
+                        cell.setCellValue(i + 1);
+                    } else if(j == 4 || j == 7 || j == 12 || j == 20 || (j == 28 && lien)) {
+                        Cell cell = row.createCell(j);
+                        System.out.println(completeData[j - 1]);
+                        cell.setCellValue(Integer.parseInt(completeData[j - 1]));
+                    } else if (j == 10) {
+                        Cell cell = row.createCell(j);
+                        System.out.println(completeData[j - 1]);
+                        cell.setCellValue(Double.parseDouble(completeData[j - 1]));
+                    }else if(j == 14) {
+                        Cell cell = row.createCell(j);
+                        System.out.println(completeData[j - 1]);
+                        cell.setCellValue(Integer.parseInt(completeData[j - 1]));
+                    } else {// Create a cell for each piece of vehicle data
+                        Cell cell = row.createCell(j);
+                        cell.setCellValue(completeData[ j - 1]);
+                    }
                 }
             }
             workbook.write(outputStream);
@@ -139,7 +163,32 @@ public class GenerationService {
             e.printStackTrace();
             return false;
         }
+//        logger.info("File generated");
         return true;
+    }
+
+    private static String generateLicensePlate() {
+        StringBuilder licensePlate = new StringBuilder();
+        // Generate the first two letters (LL)
+        licensePlate.append(generateRandomLetter());
+        licensePlate.append(generateRandomLetter());
+        // Add a space
+        licensePlate.append(" ");
+        // Generate the five-digit number (DDDDD)
+        for (int i = 0; i < 5; i++) {
+            licensePlate.append(generateRandomDigit());
+        }
+        return licensePlate.toString();
+    }
+    private static char generateRandomLetter() {
+        Random random = new Random();
+        char letter = (char) (random.nextInt(26) + 'A'); // Generates a random uppercase letter (A-Z)
+        return letter;
+    }
+    private static int generateRandomDigit() {
+        Random random = new Random();
+        int digit = random.nextInt(10); // Generates a random digit (0-9)
+        return digit;
     }
 
     private static int generateRandomYear() {
@@ -203,6 +252,7 @@ public class GenerationService {
         String lienStatus = "No";
         if (l == 1) {
             // Lien exists
+            lien = true;
             lienStatus = "Yes";
             String lienName = "Chase Auto Finance NY";
             String addressLine1 = "100 Broadway Street";
@@ -212,6 +262,7 @@ public class GenerationService {
             String zip = "10005";
             return new String[] { lienStatus, lienName, addressLine1, addressLine2, city, state, zip };
         } else if (l == 0) {
+            lien = false;
             //no lien exists
             String lienName = "-";
             String addressLine1 = "-";
@@ -243,6 +294,16 @@ public class GenerationService {
         int year = generateRandomNumber(2000, 2023);
         return String.format("%02d/%02d/%04d", month, day, year);
     }
+
+    public static double generateRandomDateAsDouble() {
+        // Generate a random time in milliseconds within a specified range (e.g., from 2000 to 2023)
+        long minTimeMillis = new Date(100, 0, 1).getTime(); // January 1, 2000
+        long maxTimeMillis = new Date(123, 11, 31).getTime(); // December 31, 2023
+        long randomTimeMillis = ThreadLocalRandom.current().nextLong(minTimeMillis, maxTimeMillis);
+        // Convert the time in milliseconds to a double
+        double dateAsDouble = (double) randomTimeMillis;
+        return dateAsDouble;
+    }
     private static String generateRandomState() {
         String[] states = { "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY" };
         Random random = new Random();
@@ -264,7 +325,7 @@ public class GenerationService {
 
     private static String[] generateOwnerData(String name) {
         // Fixed values
-        String number = "9004578825";
+        String number = "1114578825";
         String addressLine1 = "123 Main Street";
         String addressLine2 = "Apt 4B";
         String city = "New York City";
