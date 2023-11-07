@@ -137,16 +137,7 @@ public class GenerationHelper {
         return (checkDigitValue == 10) ? 'X' : (char) ('0' + checkDigitValue);
     }
 
-    private static int getCellIndex(Row row, String cellValue) {
-        for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-            Cell cell = row.getCell(cellIndex);
-            if (cell != null && cellValue.equals(cell.getStringCellValue())) {
-                return cellIndex;
-            }
-        }
-        return -1; // Not found
-    }
-
+   
     private  String[] generateLien(int l) {
         String lienStatus = "No";
         if (l == 1) {
