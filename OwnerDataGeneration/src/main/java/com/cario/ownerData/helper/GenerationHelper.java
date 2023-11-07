@@ -137,7 +137,7 @@ public class GenerationHelper {
         return (checkDigitValue == 10) ? 'X' : (char) ('0' + checkDigitValue);
     }
 
-   
+
     private  String[] generateLien(int l) {
         String lienStatus = "No";
         if (l == 1) {

@@ -28,7 +28,7 @@ public class GenerationController {
 
     @PostMapping("/generate")
     public ResponseEntity<String> uploadExcel(@RequestBody VehicleGenerationRequest request) {
-        if(service.generate_and_append(request.getOwner(), request.getVehicles())) {
+        if(service.generate_and_append(request.getOwner(), request.getVehicles() + 1)) {
             return new ResponseEntity<>("Generation Success", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Failed to Generate", HttpStatus.BAD_REQUEST);
