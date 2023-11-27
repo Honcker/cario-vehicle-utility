@@ -1,10 +1,19 @@
 package com.cario.ownerData.helper;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import jdk.nashorn.internal.runtime.logging.DebugLogger;
 
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+//import com.gargoylesoftware.htmlunit.BrowserVersion;
+//import com.gargoylesoftware.htmlunit.WebClient;
+//import com.gargoylesoftware.htmlunit.html.HtmlButton;
+//import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 
 import org.apache.poi.ss.usermodel.*;
 
@@ -27,6 +36,7 @@ public class GenerationHelper {
         String randomCarColor = selectRandomCarColor();
         String [] ownerData = generateOwnerData(name);
         String[] lienData = generateLien(generateRandomNumber(0,1));
+//        scrapeWebsiteAndPrintDescription();
         // Combine all data into a single string array
         String[] completeData = {
                 vin,
@@ -304,6 +314,65 @@ public class GenerationHelper {
         return carModels[randomIndex];
     }
 
+//    public static void scrapeWebsiteAndPrintDescription() {
+//        // Set the path to the ChromeDriver executable
+//        System.setProperty("webdriver.chrome.driver", "C:/chromedriver");
+//
+//        // Create a new instance of the ChromeDriver
+//        WebDriver driver = new ChromeDriver();
+//
+//        try {
+//            // Navigate to the website
+//            driver.get("https://vingenerator.org");  // Replace with the actual URL
+//
+//            // Find and click the "Generate" button
+//            WebElement generateButton = driver.findElement(By.id("generateButton"));  // Replace with the actual ID or other selector
+//            generateButton.click();
+//
+//            // Wait for some time (adjust as needed) for the page to generate content
+//            Thread.sleep(5000);
+//
+//            // Find and retrieve the content of VIN Description
+//            WebElement vinDescriptionElement = driver.findElement(By.id("vinDescription"));  // Replace with the actual ID or other selector
+//            String vinDescription = vinDescriptionElement.getText();
+//
+//            // Print the VIN Description
+//            System.out.println("VIN Description: " + vinDescription);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            // Close the browser
+//            driver.quit();
+//        }
+//    }
+    public static void scrapeWebsiteAndPrintDescription(String url, String buttonId, int sleepDuration) {
+        try (final WebClient webClient = new WebClient(BrowserVersion.CHROME)) {
+            // Disable JavaScript (optional, depending on your needs)
+            webClient.getOptions().setJavaScriptEnabled(false);
 
+            // Navigate to the website
+            HtmlPage page = webClient.getPage(url);
 
+            // Find and click the button
+            HtmlButton button = page.getFirstByXPath("//button[@id='" + buttonId + "']");
+            if (button != null) {
+                button.click();
+            }
+
+            // Wait for some time for the page to update or load new content
+            Thread.sleep(sleepDuration);
+
+            // Find and retrieve the data
+            String data = page.getBody().getTextContent(); // Adjust this based on your HTML structure
+            System.out.println("Data: " + data);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
+
+
+
+
